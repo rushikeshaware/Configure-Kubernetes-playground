@@ -4,6 +4,7 @@ Follow this documentation to set up a Kubernetes cluster on __CentOS 7__/RPM Bas
 This documentation guides you in setting up a cluster with one master and one node.
 
 **Step: 1**
+
 |Role|Hostname|IP|OS|RAM|CPU|
 |----|----|----|----|----|----|
 |Master|master.example.com|192.168.146.131|CentOS 7|2G|2|

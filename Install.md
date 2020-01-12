@@ -1,15 +1,16 @@
 # Install Kubernetes Cluster using kubeadm
-Follow this documentation to set up a Kubernetes cluster on __CentOS 7__ Virtual machines.
+Follow this documentation to set up a Kubernetes cluster on __CentOS 7__/RPM Base O.S./Virtual machines.
 
-This documentation guides you in setting up a cluster with one master node and one worker node.
+This documentation guides you in setting up a cluster with one master and one node.
 
-## Assumptions
-|Role|FQDN|IP|OS|RAM|CPU|
+**Step: 1**
+|Role|Hostname|IP|OS|RAM|CPU|
 |----|----|----|----|----|----|
-|Master|kmaster.example.com|172.42.42.100|CentOS 7|2G|2|
-|Worker|kworker.example.com|172.42.42.101|CentOS 7|1G|1|
+|Master|master.example.com|192.168.146.131|CentOS 7|2G|2|
+|node|node.example.com|192.168.146.132|CentOS 7|1G|1|
 
-## On both Kmaster and Kworker
+**Step: 2**
+## On both master and node
 Perform all the commands as root user unless otherwise specified
 ### Pre-requisites
 ##### Update /etc/hosts
@@ -20,6 +21,7 @@ cat >>/etc/hosts<<EOF
 172.42.42.101 kworker.example.com kworker
 EOF
 ```
+**Step: 3**
 ##### Install, enable and start docker service
 Use the Docker repository to install docker.
 > If you use docker from CentOS OS repository, the docker version might be old to work with Kubernetes v1.13.0 and above
@@ -31,21 +33,25 @@ yum install -y -q docker-ce >/dev/null 2>&1
 systemctl enable docker
 systemctl start docker
 ```
+**Step: 4**
 ##### Disable SELinux
 ```
 setenforce 0
 sed -i --follow-symlinks 's/^SELINUX=enforcing/SELINUX=disabled/' /etc/sysconfig/selinux
 ```
+**Step: 5**
 ##### Disable Firewall
 ```
 systemctl disable firewalld
 systemctl stop firewalld
 ```
+**Step: 6**
 ##### Disable swap
 ```
 sed -i '/swap/d' /etc/fstab
 swapoff -a
 ```
+**Step: 7**
 ##### Update sysctl settings for Kubernetes networking
 ```
 cat >>/etc/sysctl.d/kubernetes.conf<<EOF
@@ -54,6 +60,7 @@ net.bridge.bridge-nf-call-iptables = 1
 EOF
 sysctl --system
 ```
+**Step: 8**
 ### Kubernetes Setup
 ##### Add yum repository
 ```
@@ -77,34 +84,37 @@ yum install -y kubeadm kubelet kubectl
 systemctl enable kubelet
 systemctl start kubelet
 ```
-## On kmaster
+**Step: 9**
+## On master
 ##### Initialize Kubernetes Cluster
 ```
-kubeadm init --apiserver-advertise-address=172.42.42.100 --pod-network-cidr=192.168.0.0/16
+kubeadm init --apiserver-advertise-address=192.168.146.133 --pod-network-cidr=172.20.0.0/16
 ```
 ##### Copy kube config
 To be able to use kubectl command to connect and interact with the cluster, the user needs kube config file.
 
-In my case, the user account is venkatn
+In my case, the user account is hrushi
 ```
-mkdir /home/venkatn/.kube
-cp /etc/kubernetes/admin.conf /home/venkatn/.kube/config
-chown -R venkatn:venkatn /home/venkatn/.kube
+mkdir /home/hrushi/.kube
+cp /etc/kubernetes/admin.conf /home/hrushi/.kube/config
+chown -R hrushi:hrushi /home/hrushi/.kube
 ```
+**Step: 10**
 ##### Deploy Calico network
-This has to be done as the user in the above step (in my case it is __venkatn__)
+This has to be done as the user in the above step.
 ```
 kubectl create -f https://docs.projectcalico.org/v3.11/manifests/calico.yaml
 ```
-
+**Step: 11**
 ##### Cluster join command
 ```
 kubeadm token create --print-join-command
 ```
-## On Kworker
+## On node
 ##### Join the cluster
 Use the output from __kubeadm token create__ command in previous step from the master server and run here.
 
+**Step: 12**
 ## Verifying the cluster
 ##### Get Nodes status
 ```

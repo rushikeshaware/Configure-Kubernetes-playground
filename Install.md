@@ -18,8 +18,8 @@ Perform all the commands as root user unless otherwise specified
 So that we can talk to each of the nodes in the cluster
 ```
 cat >>/etc/hosts<<EOF
-172.42.42.100 kmaster.example.com kmaster
-172.42.42.101 kworker.example.com kworker
+192.168.146.131 master.example.com master
+192.168.146.132 node.example.com node
 EOF
 ```
 **Step: 3**
